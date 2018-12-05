@@ -56,7 +56,7 @@ namespace Unearth.Demo.MLCodes.TestConsole
             EstimatorChain<ITransformer> dataProcessPipeline = null;
             if (useCharGrams)
             {
-                // Build a pipeline that makes features that are bags tri-char-grams
+                // Build a pipeline that makes features that are bags of tri-char-grams
                 // Adding FeaturizeText gives no improvement to accuracy
                 // Adding quad-grams makes it worse...
                 dataProcessPipeline = mlContext.Transforms.Conversion.MapValueToKey("IATACode", "Label")
@@ -65,7 +65,6 @@ namespace Unearth.Demo.MLCodes.TestConsole
                     // Get a set of floats representing all three-character sequences this will catch 'B73(7)' and '733' etc.
                     .Append(new NgramExtractingEstimator(mlContext, "FlightCodeChars", "BagOfTriChar",
                                 ngramLength: 3, weighting: NgramExtractingEstimator.WeightingCriteria.TfIdf))
-                                //ngramLength: 3, weighting: NgramExtractingEstimator.WeightingCriteria.TfIdf))
                     .Append(mlContext.Transforms.Concatenate("Features", "BagOfTriChar"));
                 Console.WriteLine("Training the CharGram Model");
             }
