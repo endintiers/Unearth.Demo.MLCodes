@@ -67,6 +67,7 @@ namespace Unearth.Demo.MLCodes.TestConsole
                     .Append(mlContext.Transforms.Text.ProduceNgrams("FlightCodeChars", "BagOfTriChar", 
                                 ngramLength: 3, weighting: NgramExtractingEstimator.WeightingCriteria.TfIdf)) 
                     .Append(mlContext.Transforms.Concatenate("Features", "BagOfTriChar"));
+
                 Console.WriteLine("Training the CharGram Model");
             }
             else
@@ -85,7 +86,7 @@ namespace Unearth.Demo.MLCodes.TestConsole
             var trainer = mlContext.MulticlassClassification.Trainers.StochasticDualCoordinateAscent(DefaultColumnNames.Label, DefaultColumnNames.Features);
             //var trainer = mlContext.MulticlassClassification.Trainers.LogisticRegression(DefaultColumnNames.Label, DefaultColumnNames.Features);
 
-            // Set the trainer and map prediction (a float) to a string (one of the original labels)
+            // Set the trainer and map prediction to a string (one of the original labels)
             var trainingPipeline = dataProcessPipeline.Append(trainer)
                     .Append(mlContext.Transforms.Conversion.MapKeyToValue("PredictedLabel"));
 
