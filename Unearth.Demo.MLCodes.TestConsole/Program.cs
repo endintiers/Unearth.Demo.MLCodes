@@ -27,6 +27,7 @@ namespace Unearth.Demo.MLCodes.TestConsole
 
             // Typical result: Text Featurizing Model: 0.9323, CharGram Model: 0.9846
             // BUT. If you train with 'ManyFlightCodes' this becomes more like 97.8 -> 98.5
+            // Note: Not 99.99%? The training and test data is not 100% accurate - it never is (at scale)
             Console.WriteLine($"Text Featurizing Model: {txtFeatAccuracy}, CharGram Model: {charGramAccuracy}");
             Console.WriteLine();
 
@@ -60,11 +61,11 @@ namespace Unearth.Demo.MLCodes.TestConsole
                 // Adding FeaturizeText gives no improvement to accuracy
                 // Adding quad-grams makes it worse...
                 dataProcessPipeline = mlContext.Transforms.Conversion.MapValueToKey("IATACode", "Label")
-                    // Turn the string into an array of characters
+                    // Turn the feature string (Flight Codes) into an array of characters
                     .Append(mlContext.Transforms.Text.TokenizeCharacters("FlightCode", "FlightCodeChars"))
                     // Get a set of floats representing all three-character sequences this will catch 'B73(7)' and '733' etc.
-                    .Append(new NgramExtractingEstimator(mlContext, "FlightCodeChars", "BagOfTriChar",
-                                ngramLength: 3, weighting: NgramExtractingEstimator.WeightingCriteria.TfIdf))
+                    .Append(mlContext.Transforms.Text.ProduceNgrams("FlightCodeChars", "BagOfTriChar", 
+                                ngramLength: 3, weighting: NgramExtractingEstimator.WeightingCriteria.TfIdf)) 
                     .Append(mlContext.Transforms.Concatenate("Features", "BagOfTriChar"));
                 Console.WriteLine("Training the CharGram Model");
             }
@@ -78,14 +79,17 @@ namespace Unearth.Demo.MLCodes.TestConsole
                 Console.WriteLine("Training the TextFeaturized Model");
             }
 
-            // Create the training algorithm/trainer
+            // Pick an algorithm and create a trainer. SDCA provides both fast training and accuracy for code classification
+            // You can add more ML.NET libraries and try other algorithms here.
+            // Logistic Regression is just as accurate and faster than SDCA when given lots of features (the char-grams)
             var trainer = mlContext.MulticlassClassification.Trainers.StochasticDualCoordinateAscent(DefaultColumnNames.Label, DefaultColumnNames.Features);
+            //var trainer = mlContext.MulticlassClassification.Trainers.LogisticRegression(DefaultColumnNames.Label, DefaultColumnNames.Features);
 
-            //Set the trainer/algorithm and map label to value (original readable state)
+            // Set the trainer and map prediction (a float) to a string (one of the original labels)
             var trainingPipeline = dataProcessPipeline.Append(trainer)
                     .Append(mlContext.Transforms.Conversion.MapKeyToValue("PredictedLabel"));
 
-            // Do the actual training
+            // Do the actual training, reads the features and builds the model
             var watch = System.Diagnostics.Stopwatch.StartNew();
             var trainedModel = trainingPipeline.Fit(trainingDataView);
             watch.Stop();
@@ -101,10 +105,10 @@ namespace Unearth.Demo.MLCodes.TestConsole
             // Create an ML.NET environment
             var mlContext = new MLContext(seed: 0);
 
-            // Make a predictor
+            // Make a predictor using the trained model
             var flightCodePredictor = model.MakePredictionFunction<FlightCodeFeatures, FlightCodePrediction>(mlContext);
 
-            // Try out some (different) test data
+            // Test the predictor (on data not used for training)
             var defaultColor = Console.ForegroundColor;
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("Predicting IATA Aircraft Codes");
