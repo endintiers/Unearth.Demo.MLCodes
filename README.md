@@ -11,4 +11,4 @@ HOWEVER, if you train with 'ManyFlightCodes' (100K samples) this becomes more li
 
 Adding Text Featurization or extra character n-grams (say quad-grams) makes training slower and helps accuracy only imperceptably. 
 
-The conclusion is: if you have a limited set of training data then tri (or bi, or quad - depends on what you are looking for) grams are a good idea. But the 'catch all' Text Featurization facility in ML.NET is VERY good.
+The conclusion is: As always, 'It Depends'. If you have a limited set of training data then tri (or bi, or quad - depends on what you are looking for) -grams are a good idea. But the 'catch all' Text Featurization facility in ML.NET is very good, especially when paired with the SDCA algorithm and fed lots of training data. The LogisticRegression algorithm works best when you have lots of features (n-grams in this case).
