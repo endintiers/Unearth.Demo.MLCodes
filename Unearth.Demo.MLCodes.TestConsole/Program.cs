@@ -1,12 +1,9 @@
 ﻿using CsvHelper;
 using Microsoft.ML;
 using Microsoft.ML.Core.Data;
-using Microsoft.ML.Runtime.Data;
-using Microsoft.ML.Transforms.Categorical;
-using Microsoft.ML.Transforms.Conversions;
+using Microsoft.ML.Data;
 using Microsoft.ML.Transforms.Text;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using Unearth.Demo.MLCodes.TestConsole.Models;
 
@@ -42,7 +39,7 @@ namespace Unearth.Demo.MLCodes.TestConsole
 
             // Create a view of the training data
             var dataPath = @"TrainingData\FlightCodes.csv";
-            TextLoader textLoader = mlContext.Data.TextReader(new TextLoader.Arguments()
+            TextLoader textLoader = mlContext.Data.CreateTextReader(new TextLoader.Arguments()
             {
                 Separator = ",",
                 HasHeader = true,
@@ -107,7 +104,7 @@ namespace Unearth.Demo.MLCodes.TestConsole
             var mlContext = new MLContext(seed: 0);
 
             // Make a predictor using the trained model
-            var flightCodePredictor = model.MakePredictionFunction<FlightCodeFeatures, FlightCodePrediction>(mlContext);
+            var flightCodePredictor = model.CreatePredictionEngine<FlightCodeFeatures, FlightCodePrediction>(mlContext);
 
             // Test the predictor (on data not used for training)
             var defaultColor = Console.ForegroundColor;

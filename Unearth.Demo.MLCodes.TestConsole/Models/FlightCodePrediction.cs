@@ -1,8 +1,5 @@
-﻿using Microsoft.ML.Runtime.Api;
-using System;
-using System.Collections.Generic;
+﻿using Microsoft.ML.Data;
 using System.Linq;
-using System.Text;
 
 namespace Unearth.Demo.MLCodes.TestConsole.Models
 {
